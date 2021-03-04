@@ -10,6 +10,8 @@ from network.network import MultiLayerNetwork
 from network.preprocessor import Preprocessor
 from network.trainer import Trainer
 
+import tensorflow
+
 
 filename = [
     ["training_images", "train-images-idx3-ubyte.gz"],
@@ -66,20 +68,30 @@ def main():
     plot_confusion_matrix(cm, class_labels)
 
 
+# def load_mnist():
+#     mnist = {}
+#     for name in filename[:2]:
+#         path = file_path.format(prefix=prefix_path, file=name[1])
+#         with gzip.open(path, 'rb') as f:
+#             mnist[name[0]] = np.frombuffer(
+#                 f.read(), np.uint8, offset=16).reshape(-1, 28*28)
+#     for name in filename[-2:]:
+#         path = file_path.format(prefix=prefix_path, file=name[1])
+#         with gzip.open(path, 'rb') as f:
+#             mnist[name[0]] = np.frombuffer(f.read(), np.uint8, offset=8)
+
+#     return mnist["training_images"], mnist["training_labels"], mnist["test_images"], mnist["test_labels"]
+
 def load_mnist():
-    mnist = {}
-    for name in filename[:2]:
-        path = file_path.format(prefix=prefix_path, file=name[1])
-        with gzip.open(path, 'rb') as f:
-            mnist[name[0]] = np.frombuffer(
-                f.read(), np.uint8, offset=16).reshape(-1, 28*28)
-    for name in filename[-2:]:
-        path = file_path.format(prefix=prefix_path, file=name[1])
-        with gzip.open(path, 'rb') as f:
-            mnist[name[0]] = np.frombuffer(f.read(), np.uint8, offset=8)
+    DATA_URL = 'https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz'
 
-    return mnist["training_images"], mnist["training_labels"], mnist["test_images"], mnist["test_labels"]
-
+    path = tensorflow.keras.utils.get_file('mnist.npz', DATA_URL)
+    with np.load(path) as data:
+        X_train = data['x_train'].reshape(len(data['x_train']), 28**2)/255
+        y_train = data['y_train']
+        X_test = data['x_test'].reshape(len(data['x_test']), 28**2)/255
+        y_test = data['y_test']
+    return X_train, y_train, X_test, y_test
 
 def visualise_image(label, x_set, y_set):
     img_idx = np.where(y_set == label)[0][0]
